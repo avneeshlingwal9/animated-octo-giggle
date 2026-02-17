@@ -10,8 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/activities");
       const activities = await response.json();
 
-      // Clear loading message
+      // Clear loading message and reset activity select
       activitiesList.innerHTML = "";
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -25,6 +26,15 @@ document.addEventListener("DOMContentLoaded", () => {
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+
+          <div class="participants">
+            <h5 class="participants-title">Participants (${details.participants.length})</h5>
+            ${details.participants.length ? `
+              <ul class="participants-list">
+                ${details.participants.map(p => `<li class="participant"><span class="avatar">${p.split('@')[0].charAt(0).toUpperCase()}</span><span class="participant-email">${p}</span></li>`).join('')}
+              </ul>
+            ` : `<p class="participant-empty">No participants yet — be the first!</p>`}
+          </div>
         `;
 
         activitiesList.appendChild(activityCard);
@@ -62,6 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        // refresh activities to show updated participants/availability
+        fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
